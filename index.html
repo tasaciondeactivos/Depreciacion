@@ -5,52 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mantenimiento del Sistema</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; background: #f0f0f0; color: #555; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; overflow: hidden; touch-action: manipulation; }
+        body { font-family: 'Courier New', Courier, monospace; background: #f0f0f0; color: #555; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; overflow: hidden; }
         .container { max-width: 400px; padding: 20px; }
-        h1 { font-size: 50px; margin: 0; color: #ccc; user-select: none; -webkit-user-select: none; }
-        p { font-size: 14px; color: #999; }
+        h1 { font-size: 50px; margin: 0; color: #ccc; cursor: pointer; user-select: none; -webkit-user-select: none; }
         #hidden-auth { display: none; margin-top: 20px; }
         input { padding: 12px; width: 85%; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 16px; outline: none; }
-        button { padding: 12px 20px; background: #888; color: white; border: none; border-radius: 5px; cursor: pointer; width: 85%; font-size: 16px; }
-        #chat-area { display: none; width: 95%; max-width: 500px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: absolute; box-sizing: border-box; z-index: 100; }
+        button { padding: 12px 20px; background: #888; color: white; border: none; border-radius: 5px; width: 85%; font-size: 16px; }
+        #chat-area { display: none; width: 95%; max-width: 500px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: absolute; box-sizing: border-box; }
         #messages { height: 250px; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; text-align: left; font-size: 14px; padding: 5px; color: #333; }
     </style>
 </head>
 <body onmousedown="resetTimer()" onkeypress="resetTimer()" ontouchstart="resetTimer()">
 
     <div class="container" id="main-view">
-        <h1 id="trigger">Error 404</h1>
-        <p>Servidor en mantenimiento programado.<br>Estado: Offline</p>
-        
+        <h1 onclick="detectClicks()">Error 404</h1>
+        <p>Servidor en mantenimiento.<br>Estado: Offline</p>
         <div id="hidden-auth">
-            <input type="password" id="passInput" placeholder="Código de acceso">
-            <button onclick="verificar()">Validar</button>
+            <input type="password" id="passInput" placeholder="Código">
+            <button onclick="verificar()">Entrar</button>
         </div>
     </div>
 
     <div id="chat-area">
-        <h3 onclick="cerrarAhora()" style="color:#ccc; font-size: 12px;">REGISTRO TEMPORAL (Tocar para cerrar)</h3>
+        <h3 onclick="cerrarAhora()" style="color:#ccc; font-size: 11px;">SESIÓN ACTIVA (Tocar para cerrar)</h3>
         <div id="messages"></div>
-        <input type="text" id="msgInput" placeholder="Escribir nota...">
+        <input type="text" id="msgInput" placeholder="Nota...">
         <button onclick="enviar()" style="background:#444;">Guardar</button>
     </div>
 
     <script>
-        // Hash para la palabra 
-        const SECRET_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
-        
-        let timer;
+        const SECRET_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917"; // mota
+        let clicks = 0;
         let timeoutTimer;
-        const trigger = document.getElementById('trigger');
 
-        // Lógica de pulsación larga para móvil
-        trigger.addEventListener('touchstart', () => {
-            timer = setTimeout(() => {
+        function detectClicks() {
+            clicks++;
+            if (clicks === 5) {
                 document.getElementById('hidden-auth').style.display = 'block';
-            }, 3000); // 3 segundos presionado
-        });
-
-        trigger.addEventListener('touchend', () => clearTimeout(timer));
+                clicks = 0;
+            }
+            setTimeout(() => { clicks = 0; }, 3000); // Reinicia contador tras 3 seg
+        }
 
         async function sha256(str) {
             const buf = new TextEncoder().encode(str);
@@ -59,48 +54,31 @@
         }
 
         async function verificar() {
-            const input = document.getElementById('passInput').value;
-            if (await sha256(input) === SECRET_HASH) {
+            const val = document.getElementById('passInput').value;
+            if (await sha256(val) === SECRET_HASH) {
                 document.getElementById('main-view').style.display = 'none';
                 document.getElementById('chat-area').style.display = 'block';
                 startTimer();
-            } else {
-                location.reload();
-            }
+            } else { location.reload(); }
         }
 
         function enviar() {
-            const msg = document.getElementById('msgInput').value;
-            if(msg) {
-                const box = document.getElementById('messages');
-                box.innerHTML += `<div><b>></b> ${msg}</div>`;
-                box.scrollTop = box.scrollHeight;
+            const m = document.getElementById('msgInput').value;
+            if(m) {
+                document.getElementById('messages').innerHTML += `<div>> ${m}</div>`;
                 document.getElementById('msgInput').value = '';
                 resetTimer();
             }
         }
 
-        // --- SEGURIDAD ---
-
-        function startTimer() {
-            timeoutTimer = setTimeout(cerrarAhora, 15000); 
+        function startTimer() { timeoutTimer = setTimeout(cerrarAhora, 15000); }
+        function resetTimer() { 
+            clearTimeout(timeoutTimer); 
+            if (document.getElementById('chat-area').style.display === 'block') startTimer(); 
         }
-
-        function resetTimer() {
-            clearTimeout(timeoutTimer);
-            if (document.getElementById('chat-area').style.display === 'block') {
-                startTimer();
-            }
-        }
-
-        function cerrarAhora() {
-            document.getElementById('chat-area').innerHTML = ""; 
-            location.reload();
-        }
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.hidden) cerrarAhora();
-        });
+        function cerrarAhora() { location.reload(); }
+        document.addEventListener("visibilitychange", () => { if (document.hidden) cerrarAhora(); });
     </script>
 </body>
 </html>
+
