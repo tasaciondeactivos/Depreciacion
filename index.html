@@ -32,7 +32,7 @@
         <div id="log"></div>
         <input type="text" id="nota" placeholder="Escribir registro..." oninput="reiniciarReloj()">
         <button onclick="guardar()">GUARDAR REGISTRO</button>
-        <p><small onclick="location.reload()" style="cursor:pointer; color:#ccc;">Cerrar ahora</small></p>
+        <p><small onclick="location.reload()" style="cursor:pointer; color:#ccc;">Finalizar sesión</small></p>
     </div>
 
     <script>
@@ -43,7 +43,8 @@
             if (clave === "mota") {
                 document.getElementById('seccion-error').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'block';
-                empezarCuentaRegresiva();
+                // Inicia el reloj de 10 segundos al entrar
+                reiniciarReloj();
             } else {
                 location.reload();
             }
@@ -60,23 +61,18 @@
             }
         }
 
-        // --- FUNCIONES DE SEGURIDAD (10 SEGUNDOS) ---
-        function empezarCuentaRegresiva() {
-            // Se cierra tras 10 segundos de inactividad
-            tiempoCierre = setTimeout(function() {
-                location.reload();
-            }, 10000);
-        }
-
+        // Esta es la parte que faltaba en tu servidor:
         function reiniciarReloj() {
             clearTimeout(tiempoCierre);
-            // Solo reinicia si el chat está visible
+            // Solo si el chat está abierto, empieza a contar 10 segundos
             if (document.getElementById('seccion-chat').style.display === 'block') {
-                empezarCuentaRegresiva();
+                tiempoCierre = setTimeout(function() {
+                    location.reload(); 
+                }, 10000); 
             }
         }
 
-        // Si cambia de pestaña o minimiza, cierra al instante por seguridad
+        // Cierre extra si se sale de la pestaña
         document.addEventListener("visibilitychange", function() {
             if (document.hidden) location.reload();
         });
