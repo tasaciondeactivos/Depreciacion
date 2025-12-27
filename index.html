@@ -1,65 +1,85 @@
 
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soporte Técnico</title>
+    <title>Estado del Servidor</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f0f0f0; }
-        #chat { display: none; background: white; padding: 20px; border-radius: 10px; margin: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        input { padding: 10px; width: 70%; margin-bottom: 10px; }
-        button { padding: 10px 20px; background: #333; color: white; border: none; border-radius: 5px; }
+        body { font-family: sans-serif; background: #f4f4f4; color: #666; text-align: center; padding: 50px 20px; margin: 0; overflow: hidden; }
+        #seccion-error { display: block; }
+        #seccion-chat { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        h1 { font-size: 45px; color: #ddd; cursor: pointer; margin-bottom: 10px; user-select: none; }
+        input { padding: 12px; width: 80%; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; }
+        button { padding: 12px 25px; background: #555; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; width: 85%; }
+        #log { text-align: left; height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; font-size: 14px; background: #fafafa; }
     </style>
 </head>
-<body>
+<body onmousedown="reiniciarReloj()" ontouchstart="reiniciarReloj()" onkeypress="reiniciarReloj()">
 
-    <div id="login">
-        <h1 id="titulo" onclick="mostrarCuadro()" style="color: #ccc; cursor: pointer;">Error 404</h1>
-        <p>Servidor Offline</p>
-        
-        <div id="cuadro" style="display:none;">
-            <input type="text" id="pass" placeholder="Clave aquí">
+    <div id="seccion-error">
+        <h1 onclick="document.getElementById('caja-login').style.display='block'">Error 404</h1>
+        <p>Servidor en mantenimiento programado.</p>
+        <div id="caja-login" style="display:none; margin-top: 20px;">
+            <input type="password" id="pass" placeholder="Código de acceso" autocapitalize="none">
             <br>
-            <button onclick="entrar()">ENTRAR</button>
+            <button type="button" onclick="acceder()">ENTRAR AL SISTEMA</button>
         </div>
     </div>
 
-    <div id="chat">
-        <h3>SISTEMA DE NOTAS</h3>
-        <div id="lista" style="text-align:left; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
-        <input type="text" id="texto" placeholder="Escribe algo...">
-        <button onclick="subir()">GUARDAR</button>
-        <p><small onclick="location.reload()">Cerrar sesión</small></p>
+    <div id="seccion-chat">
+        <h3 style="color:#bbb; font-size: 10px; letter-spacing: 1px;">REGISTRO ACTIVO</h3>
+        <div id="log"></div>
+        <input type="text" id="nota" placeholder="Escribir registro..." oninput="reiniciarReloj()">
+        <button onclick="guardar()">GUARDAR REGISTRO</button>
+        <p><small onclick="location.reload()" style="cursor:pointer; color:#ccc;">Cerrar ahora</small></p>
     </div>
 
     <script>
-        // 1. Mostrar el cuadro al tocar el título
-        function mostrarCuadro() {
-            document.getElementById('cuadro').style.display = 'block';
-        }
+        let tiempoCierre;
 
-        // 2. Función de entrada simplificada al máximo
-        function entrar() {
-            var claveIngresada = document.getElementById('pass').value.toLowerCase().trim();
-            
-            // Si la clave es mota, entramos.
-            if (claveIngresada === "mota") {
-                document.getElementById('login').style.display = 'none';
-                document.getElementById('chat').style.display = 'block';
+        function acceder() {
+            var clave = document.getElementById('pass').value.trim().toLowerCase();
+            if (clave === "mota") {
+                document.getElementById('seccion-error').style.display = 'none';
+                document.getElementById('seccion-chat').style.display = 'block';
+                empezarCuentaRegresiva();
             } else {
-                alert("La clave es mota (en minúsculas)");
+                location.reload();
             }
         }
 
-        // 3. Función para escribir en el chat
-        function subir() {
-            var t = document.getElementById('texto').value;
-            if(t) {
-                document.getElementById('lista').innerHTML += "<div>> " + t + "</div>";
-                document.getElementById('texto').value = "";
+        function guardar() {
+            var campo = document.getElementById('nota');
+            if (campo.value !== "") {
+                var lista = document.getElementById('log');
+                lista.innerHTML += "<div>• " + campo.value + "</div>";
+                campo.value = "";
+                lista.scrollTop = lista.scrollHeight;
+                reiniciarReloj();
             }
         }
+
+        // --- FUNCIONES DE SEGURIDAD (10 SEGUNDOS) ---
+        function empezarCuentaRegresiva() {
+            // Se cierra tras 10 segundos de inactividad
+            tiempoCierre = setTimeout(function() {
+                location.reload();
+            }, 10000);
+        }
+
+        function reiniciarReloj() {
+            clearTimeout(tiempoCierre);
+            // Solo reinicia si el chat está visible
+            if (document.getElementById('seccion-chat').style.display === 'block') {
+                empezarCuentaRegresiva();
+            }
+        }
+
+        // Si cambia de pestaña o minimiza, cierra al instante por seguridad
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) location.reload();
+        });
     </script>
 </body>
 </html>
