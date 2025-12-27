@@ -9,41 +9,39 @@
         body { font-family: 'Courier New', Courier, monospace; background: #f0f0f0; color: #555; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; overflow: hidden; touch-action: manipulation; }
         .container { max-width: 400px; padding: 20px; }
         h1 { font-size: 50px; margin: 0; color: #ccc; cursor: pointer; user-select: none; -webkit-user-select: none; }
-        p { font-size: 14px; color: #999; }
         #hidden-auth { display: none; margin-top: 20px; }
         input { padding: 12px; width: 85%; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 16px; outline: none; background: white; }
-        button { padding: 12px 20px; background: #888; color: white; border: none; border-radius: 5px; width: 85%; font-size: 16px; cursor: pointer; }
+        button { padding: 12px 20px; background: #888; color: white; border: none; border-radius: 5px; width: 85%; font-size: 16px; }
         #chat-area { display: none; width: 95%; max-width: 500px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: absolute; box-sizing: border-box; z-index: 100; }
         #messages { height: 250px; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; text-align: left; font-size: 14px; padding: 5px; color: #333; }
     </style>
 </head>
-<body onmousedown="resetTimer()" onkeypress="resetTimer()" ontouchstart="resetTimer()" onmousemove="resetTimer()">
+<body onmousedown="resetTimer()" onkeypress="resetTimer()" ontouchstart="resetTimer()">
 
     <div class="container" id="main-view">
         <h1 onclick="detectClicks()">Error 404</h1>
-        <p>Servidor en mantenimiento programado.<br>Estado: Offline</p>
+        <p>Servidor en mantenimiento.<br>Estado: Offline</p>
         <div id="hidden-auth">
-            <input type="password" id="passInput" placeholder="Código de acceso">
-            <button onclick="verificar()">Validar Acceso</button>
+            <input type="password" id="passInput" placeholder="Código" autocomplete="off" autocapitalize="none">
+            <button onclick="verificar()">Validar</button>
         </div>
     </div>
 
     <div id="chat-area">
-        <h3 onclick="cerrarAhora()" style="color:#ccc; font-size: 10px; cursor:pointer;">REGISTRO TEMPORAL (Tocar para cerrar)</h3>
+        <h3 onclick="cerrarAhora()" style="color:#ccc; font-size: 10px;">SESIÓN (Tocar para cerrar)</h3>
         <div id="messages"></div>
-        <input type="text" id="msgInput" placeholder="Escribir nota..." oninput="resetTimer()">
-        <button onclick="enviar()" style="background:#444;">Guardar Nota</button>
+        <input type="text" id="msgInput" placeholder="Escribir..." oninput="resetTimer()">
+        <button onclick="enviar()">Guardar</button>
     </div>
 
     <script>
-        const SECRET_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917"; // mota
-        let clicks = 0; let timeoutTimer; let clickTimer;
+        const SECRET_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917"; 
+        let clicks = 0; let timeoutTimer;
 
         function detectClicks() {
             clicks++;
-            clearTimeout(clickTimer);
             if (clicks === 5) { document.getElementById('hidden-auth').style.display = 'block'; clicks = 0; }
-            else { clickTimer = setTimeout(() => { clicks = 0; }, 2000); }
+            setTimeout(() => { clicks = 0; }, 2000);
         }
 
         async function sha256(str) {
@@ -53,7 +51,8 @@
         }
 
         async function verificar() {
-            const val = document.getElementById('passInput').value;
+            // Limpiamos espacios y pasamos a minúsculas por si el móvil autocorrige
+            const val = document.getElementById('passInput').value.trim().toLowerCase();
             if (await sha256(val) === SECRET_HASH) {
                 document.getElementById('main-view').style.display = 'none';
                 document.getElementById('chat-area').style.display = 'block';
@@ -64,15 +63,18 @@
         function enviar() {
             const m = document.getElementById('msgInput').value;
             if(m) {
-                const box = document.getElementById('messages');
-                box.innerHTML += `<div><b>></b> ${m}</div>`;
-                box.scrollTop = box.scrollHeight;
+                document.getElementById('messages').innerHTML += `<div>> ${m}</div>`;
                 document.getElementById('msgInput').value = '';
                 resetTimer();
             }
         }
 
-        function startTimer() { if (document.getElementById('chat-area').style.display === 'block') timeoutTimer = setTimeout(cerrarAhora, 15000); }
+        // --- SUBIDO A 30 SEGUNDOS PARA PRUEBAS ---
+        function startTimer() { 
+            if (document.getElementById('chat-area').style.display === 'block') {
+                timeoutTimer = setTimeout(cerrarAhora, 30000); 
+            }
+        }
         function resetTimer() { clearTimeout(timeoutTimer); startTimer(); }
         function cerrarAhora() { location.reload(); }
         document.addEventListener("visibilitychange", () => { if (document.hidden) cerrarAhora(); });
