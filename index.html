@@ -1,83 +1,65 @@
-
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mantenimiento del Sistema</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte Técnico</title>
     <style>
-        body { font-family: 'Courier New', Courier, monospace; background: #f0f0f0; color: #555; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; overflow: hidden; touch-action: manipulation; }
-        .container { max-width: 400px; padding: 20px; }
-        h1 { font-size: 50px; margin: 0; color: #ccc; cursor: pointer; user-select: none; -webkit-user-select: none; }
-        #hidden-auth { display: none; margin-top: 20px; }
-        input { padding: 12px; width: 85%; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 16px; outline: none; background: white; }
-        button { padding: 12px 20px; background: #888; color: white; border: none; border-radius: 5px; width: 85%; font-size: 16px; }
-        #chat-area { display: none; width: 95%; max-width: 500px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: absolute; box-sizing: border-box; z-index: 100; }
-        #messages { height: 250px; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; text-align: left; font-size: 14px; padding: 5px; color: #333; }
+        body { font-family: sans-serif; text-align: center; padding-top: 50px; background: #f0f0f0; }
+        #chat { display: none; background: white; padding: 20px; border-radius: 10px; margin: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { padding: 10px; width: 70%; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #333; color: white; border: none; border-radius: 5px; }
     </style>
 </head>
-<body onmousedown="resetTimer()" onkeypress="resetTimer()" ontouchstart="resetTimer()">
+<body>
 
-    <div class="container" id="main-view">
-        <h1 onclick="detectClicks()">Error 404</h1>
-        <p>Servidor en mantenimiento.<br>Estado: Offline</p>
-        <div id="hidden-auth">
-            <input type="password" id="passInput" placeholder="Código" autocomplete="off" autocapitalize="none">
-            <button onclick="verificar()">Validar</button>
+    <div id="login">
+        <h1 id="titulo" onclick="mostrarCuadro()" style="color: #ccc; cursor: pointer;">Error 404</h1>
+        <p>Servidor Offline</p>
+        
+        <div id="cuadro" style="display:none;">
+            <input type="text" id="pass" placeholder="Clave aquí">
+            <br>
+            <button onclick="entrar()">ENTRAR</button>
         </div>
     </div>
 
-    <div id="chat-area">
-        <h3 onclick="cerrarAhora()" style="color:#ccc; font-size: 10px;">SESIÓN (Tocar para cerrar)</h3>
-        <div id="messages"></div>
-        <input type="text" id="msgInput" placeholder="Escribir..." oninput="resetTimer()">
-        <button onclick="enviar()">Guardar</button>
+    <div id="chat">
+        <h3>SISTEMA DE NOTAS</h3>
+        <div id="lista" style="text-align:left; margin-bottom:10px; border-bottom:1px solid #eee;"></div>
+        <input type="text" id="texto" placeholder="Escribe algo...">
+        <button onclick="subir()">GUARDAR</button>
+        <p><small onclick="location.reload()">Cerrar sesión</small></p>
     </div>
 
     <script>
-        const SECRET_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917"; 
-        let clicks = 0; let timeoutTimer;
-
-        function detectClicks() {
-            clicks++;
-            if (clicks === 5) { document.getElementById('hidden-auth').style.display = 'block'; clicks = 0; }
-            setTimeout(() => { clicks = 0; }, 2000);
+        // 1. Mostrar el cuadro al tocar el título
+        function mostrarCuadro() {
+            document.getElementById('cuadro').style.display = 'block';
         }
 
-        async function sha256(str) {
-            const buf = new TextEncoder().encode(str);
-            const hash = await crypto.subtle.digest('SHA-256', buf);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        async function verificar() {
-            // Limpiamos espacios y pasamos a minúsculas por si el móvil autocorrige
-            const val = document.getElementById('passInput').value.trim().toLowerCase();
-            if (await sha256(val) === SECRET_HASH) {
-                document.getElementById('main-view').style.display = 'none';
-                document.getElementById('chat-area').style.display = 'block';
-                startTimer();
-            } else { location.reload(); }
-        }
-
-        function enviar() {
-            const m = document.getElementById('msgInput').value;
-            if(m) {
-                document.getElementById('messages').innerHTML += `<div>> ${m}</div>`;
-                document.getElementById('msgInput').value = '';
-                resetTimer();
+        // 2. Función de entrada simplificada al máximo
+        function entrar() {
+            var claveIngresada = document.getElementById('pass').value.toLowerCase().trim();
+            
+            // Si la clave es mota, entramos.
+            if (claveIngresada === "mota") {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+            } else {
+                alert("La clave es mota (en minúsculas)");
             }
         }
 
-        // --- SUBIDO A 30 SEGUNDOS PARA PRUEBAS ---
-        function startTimer() { 
-            if (document.getElementById('chat-area').style.display === 'block') {
-                timeoutTimer = setTimeout(cerrarAhora, 30000); 
+        // 3. Función para escribir en el chat
+        function subir() {
+            var t = document.getElementById('texto').value;
+            if(t) {
+                document.getElementById('lista').innerHTML += "<div>> " + t + "</div>";
+                document.getElementById('texto').value = "";
             }
         }
-        function resetTimer() { clearTimeout(timeoutTimer); startTimer(); }
-        function cerrarAhora() { location.reload(); }
-        document.addEventListener("visibilitychange", () => { if (document.hidden) cerrarAhora(); });
     </script>
 </body>
 </html>
+
