@@ -1,83 +1,39 @@
+
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mantenimiento del Sistema</title>
-    <style>
-        body { font-family: 'Courier New', Courier, monospace; background: #f0f0f0; color: #555; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; text-align: center; overflow: hidden; }
-        .container { max-width: 400px; padding: 20px; }
-        h1 { font-size: 50px; margin: 0; color: #ccc; cursor: pointer; user-select: none; -webkit-user-select: none; }
-        #hidden-auth { display: none; margin-top: 20px; }
-        input { padding: 12px; width: 85%; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; font-size: 16px; outline: none; }
-        button { padding: 12px 20px; background: #888; color: white; border: none; border-radius: 5px; width: 85%; font-size: 16px; }
-        #chat-area { display: none; width: 95%; max-width: 500px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: absolute; box-sizing: border-box; }
-        #messages { height: 250px; overflow-y: auto; border-bottom: 1px solid #eee; margin-bottom: 10px; text-align: left; font-size: 14px; padding: 5px; color: #333; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte</title>
 </head>
-<body onmousedown="resetTimer()" onkeypress="resetTimer()" ontouchstart="resetTimer()">
-
-    <div class="container" id="main-view">
-        <h1 onclick="detectClicks()">Error 404</h1>
-        <p>Servidor en mantenimiento.<br>Estado: Offline</p>
-        <div id="hidden-auth">
-            <input type="password" id="passInput" placeholder="Código">
-            <button onclick="verificar()">Entrar</button>
-        </div>
+<body>
+    <div id="login">
+        <h1 onclick="entrar()">Error 404</h1>
+        <p>Presiona el texto "Error 404" para continuar.</p>
+        <input type="text" id="clave" placeholder="Clave">
+        <button onclick="validar()">Entrar</button>
     </div>
 
-    <div id="chat-area">
-        <h3 onclick="cerrarAhora()" style="color:#ccc; font-size: 11px;">SESIÓN ACTIVA (Tocar para cerrar)</h3>
-        <div id="messages"></div>
-        <input type="text" id="msgInput" placeholder="Nota...">
-        <button onclick="enviar()" style="background:#444;">Guardar</button>
+    <div id="chat" style="display:none; background:white; padding:20px;">
+        <h2>SESIÓN ACTIVA</h2>
+        <input type="text" id="nota">
+        <button onclick="alert('Guardado')">Guardar</button>
+        <p>Si ves esto, el sistema funciona.</p>
     </div>
 
     <script>
-        const SECRET_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917"; // mota
-        let clicks = 0;
-        let timeoutTimer;
-
-        function detectClicks() {
-            clicks++;
-            if (clicks === 5) {
-                document.getElementById('hidden-auth').style.display = 'block';
-                clicks = 0;
-            }
-            setTimeout(() => { clicks = 0; }, 3000); // Reinicia contador tras 3 seg
+        function entrar() {
+            alert("Has tocado el título. Ahora pon la clave.");
         }
-
-        async function sha256(str) {
-            const buf = new TextEncoder().encode(str);
-            const hash = await crypto.subtle.digest('SHA-256', buf);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        async function verificar() {
-            const val = document.getElementById('passInput').value;
-            if (await sha256(val) === SECRET_HASH) {
-                document.getElementById('main-view').style.display = 'none';
-                document.getElementById('chat-area').style.display = 'block';
-                startTimer();
-            } else { location.reload(); }
-        }
-
-        function enviar() {
-            const m = document.getElementById('msgInput').value;
-            if(m) {
-                document.getElementById('messages').innerHTML += `<div>> ${m}</div>`;
-                document.getElementById('msgInput').value = '';
-                resetTimer();
+        function validar() {
+            var pass = document.getElementById('clave').value;
+            if (pass === "mota") {
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('chat').style.display = 'block';
+            } else {
+                alert("Clave incorrecta");
             }
         }
-
-        function startTimer() { timeoutTimer = setTimeout(cerrarAhora, 15000); }
-        function resetTimer() { 
-            clearTimeout(timeoutTimer); 
-            if (document.getElementById('chat-area').style.display === 'block') startTimer(); 
-        }
-        function cerrarAhora() { location.reload(); }
-        document.addEventListener("visibilitychange", () => { if (document.hidden) cerrarAhora(); });
     </script>
 </body>
 </html>
