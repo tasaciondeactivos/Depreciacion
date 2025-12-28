@@ -18,8 +18,9 @@
 <body onmousedown="reiniciarReloj()" ontouchstart="reiniciarReloj()" onkeypress="reiniciarReloj()">
 
     <div id="seccion-error">
-        <h1 onclick="document.getElementById('caja-login').style.display='block'">Error 404</h1>
+        <h1 onclick="detectarClicks()">Error 404</h1>
         <p>Servidor en mantenimiento programado.</p>
+        
         <div id="caja-login" style="display:none; margin-top: 20px;">
             <input type="password" id="pass" placeholder="Código de acceso" autocapitalize="none">
             <br>
@@ -37,13 +38,37 @@
 
     <script>
         let tiempoCierre;
+        let contadorClicks = 0;
+        let timerClicks;
 
-        function acceder() {
-            var clave = document.getElementById('pass').value.trim().toLowerCase();
-            if (clave === "mota") {
+        // CAMBIO 2: La clave "mota" está oculta en este código (Hash SHA-256)
+        const CLAVE_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
+
+        function detectarClicks() {
+            contadorClicks++;
+            clearTimeout(timerClicks);
+            if (contadorClicks === 5) {
+                document.getElementById('caja-login').style.display = 'block';
+                contadorClicks = 0;
+            } else {
+                timerClicks = setTimeout(() => { contadorClicks = 0; }, 2000);
+            }
+        }
+
+        async function sha256(string) {
+            const utf8 = new TextEncoder().encode(string);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function acceder() {
+            var input = document.getElementById('pass').value.trim().toLowerCase();
+            var hashedInput = await sha256(input);
+            
+            if (hashedInput === CLAVE_HASH) {
                 document.getElementById('seccion-error').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'block';
-                // Inicia el reloj de 10 segundos al entrar
                 reiniciarReloj();
             } else {
                 location.reload();
@@ -61,10 +86,8 @@
             }
         }
 
-        // Esta es la parte que faltaba en tu servidor:
         function reiniciarReloj() {
             clearTimeout(tiempoCierre);
-            // Solo si el chat está abierto, empieza a contar 10 segundos
             if (document.getElementById('seccion-chat').style.display === 'block') {
                 tiempoCierre = setTimeout(function() {
                     location.reload(); 
@@ -72,7 +95,6 @@
             }
         }
 
-        // Cierre extra si se sale de la pestaña
         document.addEventListener("visibilitychange", function() {
             if (document.hidden) location.reload();
         });
