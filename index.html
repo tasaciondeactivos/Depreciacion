@@ -1,2 +1,60 @@
 
-const CLAVE_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Experimento Hash Final</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #eee; }
+        .caja { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; cursor: pointer; background: #333; color: white; border: none; border-radius: 5px; }
+        #debug { margin-top: 20px; text-align: left; font-family: monospace; font-size: 12px; background: #333; color: #0f0; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="caja">
+        <h3>Prueba de Acceso</h3>
+        <input type="password" id="pass" placeholder="Escribe la clave">
+        <button onclick="probar()">PROBAR</button>
+
+        <div id="debug">
+            <strong>Consola de Debug:</strong>
+            <div id="linea1">Esperando entrada...</div>
+            <div id="linea2"></div>
+            <div id="linea3"></div>
+        </div>
+    </div>
+
+    <script>
+        // Este es el hash exacto de "mota" (en minúsculas)
+        const CLAVE_OBJETIVO = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
+
+        async function probar() {
+            const rawValue = document.getElementById('pass').value;
+            // Aplicamos la limpieza que planeamos
+            const cleanValue = rawValue.trim().toLowerCase();
+            
+            // 1. Mostrar qué leyó el sistema
+            document.getElementById('linea1').innerText = "1. Leído: '" + rawValue + "'";
+            document.getElementById('linea2').innerText = "2. Limpio: '" + cleanValue + "'";
+
+            // 2. Calcular Hash
+            const utf8 = new TextEncoder().encode(cleanValue);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashGenerado = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            // 3. Comparar
+            if (hashGenerado === CLAVE_OBJETIVO) {
+                document.getElementById('linea3').innerHTML = "<span style='color:white'>3. RESULTADO: ¡COINCIDENCIA EXITOSA!</span>";
+                document.getElementById('linea3').style.background = "green";
+            } else {
+                document.getElementById('linea3').innerHTML = "3. RESULTADO: NO COINCIDE<br>Hash generado: " + hashGenerado.substring(0,15) + "...";
+                document.getElementById('linea3').style.background = "red";
+            }
+        }
+    </script>
+</body>
+</html>
