@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Estado del Servidor</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; color: #666; text-align: center; padding: 50px 20px; margin: 0; overflow: hidden; }
+        body { font-family: sans-serif; background: #f4f4f4; color: #666; text-align: center; padding: 50px 20px; margin: 0; overflow: hidden; touch-action: manipulation; }
         #seccion-error { display: block; }
         #seccion-chat { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h1 { font-size: 45px; color: #ddd; cursor: pointer; margin-bottom: 10px; user-select: none; }
+        h1 { font-size: 45px; color: #ddd; cursor: pointer; margin-bottom: 10px; user-select: none; -webkit-user-select: none; }
         input { padding: 12px; width: 80%; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; }
         button { padding: 12px 25px; background: #555; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; width: 85%; }
         #log { text-align: left; height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; font-size: 14px; background: #fafafa; }
@@ -20,8 +20,9 @@
     <div id="seccion-error">
         <h1 onclick="detectarClicks()">Error 404</h1>
         <p>Servidor en mantenimiento programado.</p>
+        
         <div id="caja-login" style="display:none; margin-top: 20px;">
-            <input type="password" id="pass" placeholder="Código de acceso" autocapitalize="none">
+            <input type="password" id="pass" placeholder="Código de acceso" autocapitalize="none" autocomplete="off">
             <br>
             <button type="button" onclick="acceder()">ENTRAR AL SISTEMA</button>
         </div>
@@ -40,7 +41,7 @@
         let contadorClicks = 0;
         let timerClicks;
 
-        // "mota" oculto
+        // "mota" oculto mediante Hash SHA-256
         const CLAVE_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
 
         function detectarClicks() {
@@ -61,10 +62,10 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // Función corregida para esperar el cálculo del Hash
+        // Función asíncrona completa para validar la clave oculta
         async function acceder() {
-            var textoInput = document.getElementById('pass').value.trim().toLowerCase();
-            var hashCalculado = await sha256(textoInput);
+            const inputVal = document.getElementById('pass').value.trim().toLowerCase();
+            const hashCalculado = await sha256(inputVal);
             
             if (hashCalculado === CLAVE_HASH) {
                 document.getElementById('seccion-error').style.display = 'none';
@@ -76,9 +77,9 @@
         }
 
         function guardar() {
-            var campo = document.getElementById('nota');
+            const campo = document.getElementById('nota');
             if (campo.value !== "") {
-                var lista = document.getElementById('log');
+                const lista = document.getElementById('log');
                 lista.innerHTML += "<div>• " + campo.value + "</div>";
                 campo.value = "";
                 lista.scrollTop = lista.scrollHeight;
@@ -89,12 +90,14 @@
         function reiniciarReloj() {
             clearTimeout(tiempoCierre);
             if (document.getElementById('seccion-chat').style.display === 'block') {
+                // Bloqueo automático tras 10 segundos de inactividad
                 tiempoCierre = setTimeout(function() {
                     location.reload(); 
                 }, 10000); 
             }
         }
 
+        // Cierre inmediato si se oculta la pestaña o se bloquea el móvil
         document.addEventListener("visibilitychange", function() {
             if (document.hidden) location.reload();
         });
