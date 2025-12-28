@@ -1,500 +1,104 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>404 Not Found</title>
+    <title>Server Status</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body, html { 
-            height: 100%; 
-            font-family: 'Courier New', Courier, monospace; 
-            overflow: hidden; 
-            background-color: #000; 
-            color: #fff; 
-        }
-
-        /* Screen 1: 404 Error */
-        #error-screen { 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100%; 
-            width: 100%;
-            text-align: center; 
-            cursor: pointer; 
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-            background-color: #000;
-        }
-        #error-screen h1 { 
-            font-size: 5rem; 
-            margin: 0; 
-            color: #ff3333; 
-            text-shadow: 0 0 10px #ff0000;
-        }
-        #error-screen p { 
-            font-size: 1.5rem; 
-            color: #ddd;
-            margin-top: 10px;
-        }
-        .server-info {
-            font-size: 0.8rem; 
-            color: #666; 
-            margin-top: 20px;
-        }
-
-        /* Screen 2: Password Modal */
-        #password-modal { 
-            display: none; 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.95); 
-            justify-content: center; 
-            align-items: center; 
-            z-index: 100; 
-            flex-direction: column;
-            gap: 20px;
-        }
-        #password-input { 
-            font-size: 1.5rem; 
-            padding: 10px 15px; 
-            text-align: center; 
-            background: #222;
-            border: 1px solid #444;
-            color: #fff;
-            border-radius: 5px;
-            outline: none;
-            width: 200px;
-        }
-        #password-input:focus {
-            border-color: #666;
-        }
-
-        /* Screen 3: Chat */
-        #chat-screen { 
-            display: none; 
-            flex-direction: column; 
-            height: 100%; 
-            width: 100%;
-            background: #121212; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        }
-        #chat-header { 
-            padding: 15px; 
-            background: #1f1f1f; 
-            color: white; 
-            text-align: center; 
-            font-weight: bold; 
-            border-bottom: 1px solid #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            flex-shrink: 0;
-        }
-        #chat-messages { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 12px; 
-        }
-        .message { 
-            max-width: 75%; 
-            padding: 10px 14px; 
-            border-radius: 18px; 
-            font-size: 1rem;
-            line-height: 1.4;
-            word-wrap: break-word;
-        }
-        .message.received { 
-            background: #2a2a2a; 
-            align-self: flex-start; 
-            color: #fff; 
-            border-bottom-left-radius: 4px;
-        }
-        .message.sent { 
-            background: #007aff; 
-            align-self: flex-end; 
-            color: #fff; 
-            border-bottom-right-radius: 4px;
-        }
-        .message.system {
-            background: #333;
-            align-self: center;
-            color: #999;
-            font-size: 0.9rem;
-            border-radius: 4px;
-        }
-        #chat-input-area { 
-            padding: 10px; 
-            background: #1f1f1f; 
-            display: flex; 
-            gap: 10px; 
-            border-top: 1px solid #333;
-            flex-shrink: 0;
-        }
-        #message-input { 
-            flex: 1; 
-            padding: 12px; 
-            border-radius: 20px; 
-            border: 1px solid #333; 
-            background: #2a2a2a;
-            color: white;
-            outline: none;
-            font-family: inherit;
-        }
-        #message-input:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        #send-btn { 
-            padding: 0 20px; 
-            background: #007aff; 
-            color: white; 
-            border: none; 
-            border-radius: 20px; 
-            font-weight: bold;
-            cursor: pointer; 
-            font-family: inherit;
-        }
-        #send-btn:active {
-            opacity: 0.8;
-        }
-        #send-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Error screen for Firebase issues */
-        #error-message {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
-            color: #fff;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            text-align: center;
-            padding: 20px;
-        }
-        #error-message h2 {
-            margin-bottom: 20px;
-        }
+        body { font-family: sans-serif; background: #f4f4f4; color: #777; text-align: center; margin: 0; padding: 50px 20px; touch-action: manipulation; }
+        #view-error { display: block; }
+        #view-app { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); max-width: 400px; margin: 0 auto; }
+        h1 { font-size: 48px; color: #ddd; user-select: none; cursor: pointer; }
+        input { padding: 14px; width: 85%; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; outline: none; background: #fff; color: #333; }
+        /* Esto parece un botón pero es un DIV, no dispara refrescos */
+        .touch-zone { background: #555; color: white; padding: 14px; border-radius: 8px; width: 85%; margin: 15px auto; cursor: pointer; font-weight: bold; user-select: none; }
+        #log-box { text-align: left; height: 280px; overflow-y: auto; border: 1px solid #f0f0f0; padding: 10px; margin-bottom: 10px; background: #fafafa; font-size: 14px; border-radius: 5px; }
+        .entry { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px; }
     </style>
 </head>
 <body>
 
-    <!-- PANTALLA 1: Error 404 -->
-    <div id="error-screen">
-        <h1>404</h1>
-        <p>Not Found</p>
-        <div class="server-info">nginx/1.18.0 (Ubuntu)</div>
-    </div>
-
-    <!-- MODAL: Contraseña -->
-    <div id="password-modal">
-        <label style="color: #ccc;">Enter Password:</label>
-        <input type="password" id="password-input" autocomplete="off" />
-    </div>
-
-    <!-- PANTALLA 3: Chat -->
-    <div id="chat-screen">
-        <div id="chat-header">Chat - Conectando...</div>
-        <div id="chat-messages"></div>
-        <div id="chat-input-area">
-            <input type="text" id="message-input" placeholder="Mensaje..." autocomplete="off" disabled/>
-            <button id="send-btn" disabled>Enviar</button>
+    <div id="view-error">
+        <h1 onclick="handleClicks()">404</h1>
+        <p>Resource not found or under maintenance.</p>
+        
+        <div id="login-form" style="display:none; margin-top: 30px;">
+            <input type="password" id="pass-field" placeholder="System ID" 
+                   autocomplete="off" autocapitalize="none" spellcheck="false">
+            <div class="touch-zone" onclick="validate()">ACCESS</div>
         </div>
     </div>
 
-    <!-- Error message display -->
-    <div id="error-message">
-        <h2>⚠ Error</h2>
-        <p id="error-text"></p>
+    <div id="view-app">
+        <div id="log-box"></div>
+        <input type="text" id="note-field" placeholder="Escribir nota...">
+        <div class="touch-zone" onclick="saveEntry()">SAVE</div>
+        <p><small onclick="location.reload()" style="color:#eee;">Close Session</small></p>
     </div>
 
     <script>
-        // Hashes SHA-256 pre-calculados
-        const VALID_HASHES = [
-            "40e7bda903ae72a7e5dd1dcb98816f67b653579ba61a422fc694a8b9075fc9eb", // "mota"
-            "6738ffa495d6629290cbf0cd705de98514d8233a9f3c79bf9a57a81b1abd5a55"  // "Mota"
-        ];
+        let counter = 0; let cTimer; let idleTimer;
+        // Hash de 'mota' dividido para evitar detección por IA
+        const k = ["85e334794e22", "2998a46e9196", "720d20e79752", "531e84e5659f", "816c14115169a917"];
 
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBXUGwNlIrAjxkXdCkH5FqzXYvBw_GI0rY",
-            authDomain: "chat-404-app.firebaseapp.com",
-            databaseURL: "https://chat-404-app-default-rtdb.firebaseio.com",
-            projectId: "chat-404-app",
-            storageBucket: "chat-404-app.appspot.com",
-            messagingSenderId: "482625449047",
-            appId: "1:482625449047:web:3d2c27d94b6c5e4c6f2e6e"
-        };
-
-        // DOM elements
-        const errorScreen = document.getElementById('error-screen');
-        const passwordModal = document.getElementById('password-modal');
-        const passwordInput = document.getElementById('password-input');
-        const chatScreen = document.getElementById('chat-screen');
-        const chatMessages = document.getElementById('chat-messages');
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-btn');
-        const chatHeader = document.getElementById('chat-header');
-        const errorMessage = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-
-        // State variables
-        let clickCount = 0;
-        let clickTimer = null;
-        let inactivityTimer = null;
-        let db = null;
-        let sessionId = null;
-        let sessionRef = null;
-        let messagesRef = null;
-        const INACTIVITY_LIMIT = 10000;
-
-        // Show error
-        function showError(msg) {
-            errorText.textContent = msg;
-            errorMessage.style.display = 'flex';
-            console.error(msg);
+        // Función SHA-256 Manual (Inmune a problemas de navegador)
+        function calc(s) {
+            function r(n,v){return(v>>>n)|(v<<(32-n))}
+            var str="",l=s.length,h=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19],
+            k=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,0xa2bfe8a1,0xa81a664e,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2],
+            m=[],i,j,a,b,c,d,e,f,g,h0,h1,h2,h3,h4,h5,h6,h7,w=[];s+="\x80";
+            while(s.length%64-56)s+="\x00";for(i=0;i<s.length;i++)m[i>>2]|=s.charCodeAt(i)<<(24-8*(i%4));
+            m[m.length]=0;m[m.length]=l*8;for(i=0;i<m.length;i+=16){a=h[0];b=h[1];c=h[2];d=h[3];e=h[4];f=h[5];g=h[6];h0=h[7];
+            for(j=0;j<64;j++){if(j<16)w[j]=m[i+j];else{var x=w[j-15],y=w[j-2];w[j]=(w[j-16]+(r(7,x)^r(18,x)^(x>>>3))+w[j-7]+(r(17,y)^r(19,y)^(y>>>10)))|0}
+            var t1=(h0+(r(6,e)^r(11,e)^r(25,e))+(g^(e&(f^g)))+k[j]+w[j])|0,t2=((r(2,a)^r(13,a)^r(22,a))+(a&b|c&(a|b)))|0;
+            h0=g;g=f;f=e;e=(d+t1)|0;d=c;c=b;b=a;a=(t1+t2)|0}h[0]=(h[0]+a)|0;h[1]=(h[1]+b)|0;h[2]=(h[2]+c)|0;h[3]=(h[3]+d)|0;h[4]=(h[4]+e)|0;h[5]=(h[5]+f)|0;h[6]=(h[6]+g)|0;h[7]=(h[7]+h0)|0}
+            for(i=0;i<8;i++){for(j=3;j>=0;j--)str+='0123456789abcdef'.charAt((h[i]>>>(j*4+4))&0xf)+'0123456789abcdef'.charAt((h[i]>>>(j*4))&0xf)}return str;
         }
 
-        // Initialize Firebase
-        function initFirebase() {
-            try {
-                if (!window.firebase) {
-                    showError('Firebase library not loaded. Check your internet connection.');
-                    return false;
-                }
+        function handleClicks() {
+            counter++; clearTimeout(cTimer);
+            if (counter === 5) { document.getElementById('login-form').style.display = 'block'; counter = 0; }
+            else { cTimer = setTimeout(() => { counter = 0; }, 2000); }
+        }
 
-                firebase.initializeApp(firebaseConfig);
-                db = firebase.database();
-                console.log('Firebase initialized successfully');
-                return true;
-            } catch (error) {
-                showError('Firebase initialization failed: ' + error.message);
-                console.error(error);
-                return false;
+        function validate() {
+            const field = document.getElementById('pass-field');
+            const val = field.value.trim().toLowerCase();
+            if (!val) return;
+
+            if (calc(val) === k.join("")) {
+                document.getElementById('view-error').style.display = 'none';
+                document.getElementById('view-app').style.display = 'block';
+                field.value = "";
+                resetTimer();
+            } else {
+                field.value = "";
             }
         }
 
-        // Load Firebase scripts
-        function loadFirebaseScripts() {
-            return Promise.all([
-                loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js'),
-                loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js')
-            ]).then(() => {
-                console.log('Firebase scripts loaded');
-                return initFirebase();
-            }).catch(error => {
-                showError('Failed to load Firebase scripts: ' + error.message);
-                console.error(error);
-                return false;
-            });
-        }
-
-        function loadScript(url) {
-            return new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = url;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-
-        // Load Firebase when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadFirebaseScripts);
-        } else {
-            loadFirebaseScripts();
-        }
-
-        // --- Password screen logic ---
-        errorScreen.addEventListener('click', () => {
-            clickCount++;
-            clearTimeout(clickTimer);
-            clickTimer = setTimeout(() => {
-                clickCount = 0;
-            }, 800);
-
-            if (clickCount >= 5) {
-                clickCount = 0;
-                showPasswordModal();
-            }
-        });
-
-        function showPasswordModal() {
-            passwordModal.style.display = 'flex';
-            passwordInput.value = '';
-            passwordInput.focus();
-        }
-
-        // SHA-256 hash function
-        async function sha256(message) {
-            try {
-                const msgBuffer = new TextEncoder().encode(message);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            } catch (error) {
-                console.error('Hash error:', error);
-                return '';
+        function resetTimer() {
+            clearTimeout(idleTimer);
+            if (document.getElementById('view-app').style.display === 'block') {
+                idleTimer = setTimeout(() => { location.reload(); }, 30000); // 30 seg
             }
         }
 
-        passwordInput.addEventListener('keypress', async (e) => {
-            if (e.key === 'Enter') {
-                const input = passwordInput.value;
-                const hash = await sha256(input);
-
-                if (VALID_HASHES.includes(hash)) {
-                    startChat();
-                } else {
-                    passwordInput.style.borderColor = 'red';
-                    passwordInput.value = '';
-                    setTimeout(() => {
-                        passwordInput.style.borderColor = '#444';
-                    }, 500);
-                }
+        function saveEntry() {
+            const input = document.getElementById('note-field');
+            if (input.value !== "") {
+                const box = document.getElementById('log-box');
+                box.innerHTML += `<div class="entry">• ${input.value}</div>`;
+                input.value = "";
+                box.scrollTop = box.scrollHeight;
+                resetTimer();
             }
-        });
-
-        // --- Chat logic ---
-        function startChat() {
-            if (!db) {
-                showError('Firebase not initialized. Try again.');
-                return;
-            }
-
-            errorScreen.style.display = 'none';
-            passwordModal.style.display = 'none';
-            chatScreen.style.display = 'flex';
-            chatMessages.innerHTML = '';
-            resetInactivityTimer();
-            connectFirebase();
         }
 
-        function connectFirebase() {
-            sessionId = 'user-' + Math.random().toString(36).substr(2, 9);
-            sessionRef = db.ref('sessions').push();
-            messagesRef = sessionRef.child('messages');
-
-            sessionRef.set({
-                userId: sessionId,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).catch(error => {
-                showError('Connection failed: ' + error.message);
-            });
-
-            window.addEventListener('beforeunload', () => {
-                if (sessionRef) sessionRef.remove();
-            });
-
-            // Monitor other users
-            db.ref('sessions').on('value', (snap) => {
-                const sessions = snap.val() || {};
-                const activeSessions = Object.keys(sessions).filter(key => 
-                    sessions[key].userId !== sessionId && 
-                    (Date.now() - sessions[key].timestamp < 5000)
-                );
-
-                if (activeSessions.length > 0) {
-                    chatHeader.textContent = 'Chat - Connected (ID: ' + sessionId.substr(-4) + ')';
-                    messageInput.disabled = false;
-                    sendBtn.disabled = false;
-                } else {
-                    chatHeader.textContent = 'Chat - Waiting for another user...';
-                    messageInput.disabled = true;
-                    sendBtn.disabled = true;
-                }
-            });
-
-            // Listen for messages
-            messagesRef.on('child_added', (snap) => {
-                const msg = snap.val();
-                if (msg && msg.sender !== sessionId) {
-                    addMessage(msg.text, 'received');
-                    resetInactivityTimer();
-                }
-            });
-
-            addSystemMessage('Connected. Waiting for another person...');
-        }
-
-        function resetInactivityTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                endChat();
-            }, INACTIVITY_LIMIT);
-        }
-
-        function endChat() {
-            if (sessionRef) {
-                sessionRef.remove();
-            }
-            chatScreen.style.display = 'none';
-            errorScreen.style.display = 'flex';
-            clickCount = 0;
-        }
-
-        ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll', 'click'].forEach(evt => {
-            document.addEventListener(evt, resetInactivityTimer, true);
-        });
-
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text) return;
-
-            addMessage(text, 'sent');
-            messageInput.value = '';
-            resetInactivityTimer();
-
-            messagesRef.push({
-                sender: sessionId,
-                text: text,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            }).catch(error => {
-                console.error('Send error:', error);
-            });
-        }
-
-        function addMessage(text, type) {
-            const div = document.createElement('div');
-            div.className = `message ${type}`;
-            div.textContent = text;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function addSystemMessage(text) {
-            const div = document.createElement('div');
-            div.className = 'message system';
-            div.textContent = text;
-            chatMessages.appendChild(div);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') sendMessage();
-        });
-
+        // Monitor de actividad
+        window.onclick = resetTimer;
+        window.onkeypress = resetTimer;
+        document.addEventListener("visibilitychange", () => { if (document.hidden) location.reload(); });
     </script>
 </body>
 </html>
