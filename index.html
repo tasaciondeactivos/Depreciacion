@@ -3,52 +3,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Experimento Timer vs Hash</title>
+    <title>Detector de ADN de Clave</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; text-align: center; }
+        input { padding: 10px; font-size: 18px; width: 80%; margin-bottom: 10px; }
+        .panel { background: #222; padding: 15px; border-radius: 8px; text-align: left; display: inline-block; min-width: 300px; }
+        .numero { color: #ff0; font-weight: bold; margin-right: 5px; }
+    </style>
 </head>
-<body style="text-align: center; font-family: monospace; padding-top: 50px;">
+<body>
 
-    <h1>TEST DE CONFLICTO</h1>
+    <h2>ANALIZADOR DE CADENA</h2>
     
-    <div style="font-size: 30px; margin-bottom: 20px;">
-        Tiempo para cierre: <span id="segundos">10</span>s
+    <input type="text" id="entrada" placeholder="Escribe la clave aquí..." oninput="analizar()">
+    
+    <div class="panel">
+        <p><strong>Total caracteres:</strong> <span id="total">0</span></p>
+        <p><strong>Mapa numérico:</strong></p>
+        <div id="mapa">Esperando entrada...</div>
+        <hr>
+        <p><strong>Hash SHA-256 (Primeros 10):</strong><br><span id="hash-info">-</span></p>
     </div>
 
-    <input type="password" id="pass" placeholder="Escribe aquí">
-    <button onclick="probarHash()">PROBAR ENCRIPTACIÓN</button>
-
-    <p id="status" style="margin-top: 20px; color: blue;"></p>
-
     <script>
-        let segundosRestantes = 10;
-        const display = document.getElementById('segundos');
-        const status = document.getElementById('status');
+        async function analizar() {
+            const texto = document.getElementById('entrada').value;
+            const total = document.getElementById('total');
+            const mapa = document.getElementById('mapa');
+            const hashInfo = document.getElementById('hash-info');
 
-        // 1. EL TIMER: Se ejecuta cada segundo sin falta
-        const intervalo = setInterval(() => {
-            segundosRestantes--;
-            display.innerText = segundosRestantes;
-            
-            if (segundosRestantes <= 0) {
-                status.innerText = "¡TIMER AGOTADO! (Simulación de reinicio)";
-                status.style.color = "red";
-                // Aquí es donde en el original se hace location.reload()
-                clearInterval(intervalo);
+            total.innerText = texto.length;
+
+            // Convertimos cada letra a su valor numérico
+            let numeros = [];
+            for (let i = 0; i < texto.length; i++) {
+                numeros.push(`<span class="numero">${texto.charCodeAt(i)}</span>`);
             }
-        }, 1000);
+            mapa.innerHTML = numeros.length > 0 ? numeros.join(" - ") : "Vacio";
 
-        // 2. LA ENCRIPTACIÓN: Vamos a ver si esto detiene el reloj arriba
-        async function probarHash() {
-            const texto = document.getElementById('pass').value;
-            status.innerText = "Encriptando...";
-            
-            // Proceso SHA-256
-            const utf8 = new TextEncoder().encode(texto);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hashFinal = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            
-            status.innerText = "Hash generado: " + hashFinal.substring(0, 10) + "...";
-            console.log("Hash completo:", hashFinal);
+            // Probamos la encriptación rápida
+            if (texto.length > 0) {
+                const utf8 = new TextEncoder().encode(texto);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashFinal = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                hashInfo.innerText = hashFinal.substring(0, 20) + "...";
+            } else {
+                hashInfo.innerText = "-";
+            }
         }
     </script>
 </body>
