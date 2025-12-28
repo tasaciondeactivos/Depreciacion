@@ -20,7 +20,6 @@
     <div id="seccion-error">
         <h1 onclick="detectarClicks()">Error 404</h1>
         <p>Servidor en mantenimiento programado.</p>
-        
         <div id="caja-login" style="display:none; margin-top: 20px;">
             <input type="password" id="pass" placeholder="Código de acceso" autocapitalize="none">
             <br>
@@ -41,7 +40,7 @@
         let contadorClicks = 0;
         let timerClicks;
 
-        // CAMBIO 2: La clave "mota" está oculta en este código (Hash SHA-256)
+        // "mota" oculto
         const CLAVE_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
 
         function detectarClicks() {
@@ -62,11 +61,12 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
+        // Función corregida para esperar el cálculo del Hash
         async function acceder() {
-            var input = document.getElementById('pass').value.trim().toLowerCase();
-            var hashedInput = await sha256(input);
+            var textoInput = document.getElementById('pass').value.trim().toLowerCase();
+            var hashCalculado = await sha256(textoInput);
             
-            if (hashedInput === CLAVE_HASH) {
+            if (hashCalculado === CLAVE_HASH) {
                 document.getElementById('seccion-error').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'block';
                 reiniciarReloj();
