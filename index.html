@@ -1,1 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>404 Not Found</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        body, html { 
+            height: 100%; 
+            font-family: 'Courier New', Courier, monospace; 
+            overflow: hidden; 
+            background-color: #000; 
+            color: #fff; 
+        }
+
+        /* Screen 1: 404 Error */
+        #error-screen { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100%; 
+            width: 100%;
+            text-align: center; 
+            cursor: pointer; 
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            background-color: #000;
+        }
+        #error-screen h1 { 
+            font-size: 5rem; 
+            margin: 0; 
+            color: #ff3333; 
+            text-shadow: 0 0 10px #ff0000;
+        }
+        #error-screen p { 
+            font-size: 1.5rem; 
+            color: #ddd;
+            margin-top: 10px;
+        }
+        .server-info {
+            font-size: 0.8rem; 
+            color: #666; 
+            margin-top: 20px;
+        }
+
+        /* Screen 2: Password Modal */
+        #password-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.95); 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 100; 
+            flex-direction: column;
+            gap: 20px;
+        }
+        #password-input { 
+            font-size: 1.5rem; 
+            padding: 10px 15px; 
+            text-align: center; 
+            background: #222;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 5px;
+            outline: none;
+            width: 200px;
+        }
+        #password-input:focus {
+            border-color: #666;
+        }
+
+        /* Screen 3: Chat */
+        #chat-screen { 
+            display: none; 
+            flex-direction: column; 
+            height: 100%; 
+            width: 100%;
+            background: #121212; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+        #chat-header { 
+            padding: 15px; 
+            background: #1f1f1f; 
+            color: white; 
+            text-align: center; 
+            font-weight: bold; 
+            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        #chat-messages { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+        }
+        .message { 
+            max-width: 75%; 
+            padding: 10px 14px; 
+            border-radius: 18px; 
+            font-size: 1rem;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+        .message.received { 
+            background: #2a2a2a; 
+            align-self: flex-start; 
+            color: #fff; 
+            border-bottom-left-radius: 4px;
+        }
+        .message.sent { 
+            background: #007aff; 
+            align-self: flex-end; 
+            color: #fff; 
+            border-bottom-right-radius: 4px;
+        }
+        .message.system {
+            background: #333;
+            align-self: center;
+            color: #999;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+        #chat-input-area { 
+            padding: 10px; 
+            background: #1f1f1f; 
+            display: flex; 
+            gap: 10px; 
+            border-top: 1px solid #333;
+            flex-shrink: 0;
+        }
+        #message-input { 
+            flex: 1; 
+            padding: 12px; 
+            border-radius: 20px; 
+            border: 1px solid #333; 
+            background: #2a2a2a;
+            color: white;
+            outline: none;
+            font-family: inherit;
+        }
+        #message-input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #send-btn { 
+            padding: 0 20px; 
+            background: #007aff; 
+            color: white; 
+            border: none; 
+            border-radius: 20px; 
+            font-weight: bold;
+            cursor: pointer; 
+            font-family: inherit;
+        }
+        #send-btn:active {
+            opacity: 0.8;
+        }
+        #send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Error screen for Firebase issues */
+        #error-message {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            text-align: center;
+            padding: 20px;
+        }
+        #error-message h2 {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PANTALLA 1: Error 404 -->
+    <div id="error-screen">
+        <h1>404</h1>
+        <p>Not Found</p>
+        <div class="server-info">nginx/1.18.0 (Ubuntu)</div>
+    </div>
+
+    <!-- MODAL: Contraseña -->
+    <div id="password-modal">
+        <label style="color: #ccc;">Enter Password:</label>
+        <input type="password" id="password-input" autocomplete="off" />
+    </div>
+
+    <!-- PANTALLA 3: Chat -->
+    <div id="chat-screen">
+        <div id="chat-header">Chat - Conectando...</div>
+        <div id="chat-messages"></div>
+        <div id="chat-input-area">
+            <input type="text" id="message-input" placeholder="Mensaje..." autocomplete="off" disabled/>
+            <button id="send-btn" disabled>Enviar</button>
+        </div>
+    </div>
+
+    <!-- Error message display -->
+    <div id="error-message">
+        <h2>⚠ Error</h2>
+        <p id="error-text"></p>
+    </div>
+
+    <script>
+        // Hashes SHA-256 pre-calculados
+        const VALID_HASHES = [
+            "40e7bda903ae72a7e5dd1dcb98816f67b653579ba61a422fc694a8b9075fc9eb", // "mota"
+            "6738ffa495d6629290cbf0cd705de98514d8233a9f3c79bf9a57a81b1abd5a55"  // "Mota"
+        ];
+
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXUGwNlIrAjxkXdCkH5FqzXYvBw_GI0rY",
+            authDomain: "chat-404-app.firebaseapp.com",
+            databaseURL: "https://chat-404-app-default-rtdb.firebaseio.com",
+            projectId: "chat-404-app",
+            storageBucket: "chat-404-app.appspot.com",
+            messagingSenderId: "482625449047",
+            appId: "1:482625449047:web:3d2c27d94b6c5e4c6f2e6e"
+        };
+
+        // DOM elements
+        const errorScreen = document.getElementById('error-screen');
+        const passwordModal = document.getElementById('password-modal');
+        const passwordInput = document.getElementById('password-input');
+        const chatScreen = document.getElementById('chat-screen');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatHeader = document.getElementById('chat-header');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+
+        // State variables
+        let clickCount = 0;
+        let clickTimer = null;
+        let inactivityTimer = null;
+        let db = null;
+        let sessionId = null;
+        let sessionRef = null;
+        let messagesRef = null;
+        const INACTIVITY_LIMIT = 10000;
+
+        // Show error
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorMessage.style.display = 'flex';
+            console.error(msg);
+        }
+
+        // Initialize Firebase
+        function initFirebase() {
+            try {
+                if (!window.firebase) {
+                    showError('Firebase library not loaded. Check your internet connection.');
+                    return false;
+                }
+
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                console.log('Firebase initialized successfully');
+                return true;
+            } catch (error) {
+                showError('Firebase initialization failed: ' + error.message);
+                console.error(error);
+                return false;
+            }
+        }
+
+        // Load Firebase scripts
+        function loadFirebaseScripts() {
+            return Promise.all([
+                loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js'),
+                loadScript('https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js')
+            ]).then(() => {
+                console.log('Firebase scripts loaded');
+                return initFirebase();
+            }).catch(error => {
+                showError('Failed to load Firebase scripts: ' + error.message);
+                console.error(error);
+                return false;
+            });
+        }
+
+        function loadScript(url) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = url;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        // Load Firebase when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadFirebaseScripts);
+        } else {
+            loadFirebaseScripts();
+        }
+
+        // --- Password screen logic ---
+        errorScreen.addEventListener('click', () => {
+            clickCount++;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+                clickCount = 0;
+            }, 800);
+
+            if (clickCount >= 5) {
+                clickCount = 0;
+                showPasswordModal();
+            }
+        });
+
+        function showPasswordModal() {
+            passwordModal.style.display = 'flex';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+
+        // SHA-256 hash function
+        async function sha256(message) {
+            try {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            } catch (error) {
+                console.error('Hash error:', error);
+                return '';
+            }
+        }
+
+        passwordInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const input = passwordInput.value;
+                const hash = await sha256(input);
+
+                if (VALID_HASHES.includes(hash)) {
+                    startChat();
+                } else {
+                    passwordInput.style.borderColor = 'red';
+                    passwordInput.value = '';
+                    setTimeout(() => {
+                        passwordInput.style.borderColor = '#444';
+                    }, 500);
+                }
+            }
+        });
+
+        // --- Chat logic ---
+        function startChat() {
+            if (!db) {
+                showError('Firebase not initialized. Try again.');
+                return;
+            }
+
+            errorScreen.style.display = 'none';
+            passwordModal.style.display = 'none';
+            chatScreen.style.display = 'flex';
+            chatMessages.innerHTML = '';
+            resetInactivityTimer();
+            connectFirebase();
+        }
+
+        function connectFirebase() {
+            sessionId = 'user-' + Math.random().toString(36).substr(2, 9);
+            sessionRef = db.ref('sessions').push();
+            messagesRef = sessionRef.child('messages');
+
+            sessionRef.set({
+                userId: sessionId,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).catch(error => {
+                showError('Connection failed: ' + error.message);
+            });
+
+            window.addEventListener('beforeunload', () => {
+                if (sessionRef) sessionRef.remove();
+            });
+
+            // Monitor other users
+            db.ref('sessions').on('value', (snap) => {
+                const sessions = snap.val() || {};
+                const activeSessions = Object.keys(sessions).filter(key => 
+                    sessions[key].userId !== sessionId && 
+                    (Date.now() - sessions[key].timestamp < 5000)
+                );
+
+                if (activeSessions.length > 0) {
+                    chatHeader.textContent = 'Chat - Connected (ID: ' + sessionId.substr(-4) + ')';
+                    messageInput.disabled = false;
+                    sendBtn.disabled = false;
+                } else {
+                    chatHeader.textContent = 'Chat - Waiting for another user...';
+                    messageInput.disabled = true;
+                    sendBtn.disabled = true;
+                }
+            });
+
+            // Listen for messages
+            messagesRef.on('child_added', (snap) => {
+                const msg = snap.val();
+                if (msg && msg.sender !== sessionId) {
+                    addMessage(msg.text, 'received');
+                    resetInactivityTimer();
+                }
+            });
+
+            addSystemMessage('Connected. Waiting for another person...');
+        }
+
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(() => {
+                endChat();
+            }, INACTIVITY_LIMIT);
+        }
+
+        function endChat() {
+            if (sessionRef) {
+                sessionRef.remove();
+            }
+            chatScreen.style.display = 'none';
+            errorScreen.style.display = 'flex';
+            clickCount = 0;
+        }
+
+        ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll', 'click'].forEach(evt => {
+            document.addEventListener(evt, resetInactivityTimer, true);
+        });
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'sent');
+            messageInput.value = '';
+            resetInactivityTimer();
+
+            messagesRef.push({
+                sender: sessionId,
+                text: text,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            }).catch(error => {
+                console.error('Send error:', error);
+            });
+        }
+
+        function addMessage(text, type) {
+            const div = document.createElement('div');
+            div.className = `message ${type}`;
+            div.textContent = text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const div = document.createElement('div');
+            div.className = 'message system';
+            div.textContent = text;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+    </script>
+</body>
+</html>
