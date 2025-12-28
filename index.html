@@ -3,55 +3,107 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Detector de ADN de Clave</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estado del Servidor</title>
     <style>
-        body { font-family: monospace; background: #111; color: #0f0; padding: 20px; text-align: center; }
-        input { padding: 10px; font-size: 18px; width: 80%; margin-bottom: 10px; }
-        .panel { background: #222; padding: 15px; border-radius: 8px; text-align: left; display: inline-block; min-width: 300px; }
-        .numero { color: #ff0; font-weight: bold; margin-right: 5px; }
+        body { font-family: sans-serif; background: #f4f4f4; color: #666; text-align: center; padding: 50px 20px; margin: 0; overflow: hidden; touch-action: manipulation; }
+        #seccion-error { display: block; }
+        #seccion-chat { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        h1 { font-size: 45px; color: #ddd; cursor: pointer; margin-bottom: 10px; user-select: none; -webkit-user-select: none; }
+        input { padding: 12px; width: 80%; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; }
+        button { padding: 12px 25px; background: #555; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; width: 85%; }
+        #log { text-align: left; height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; font-size: 14px; background: #fafafa; }
     </style>
 </head>
-<body>
+<body onmousedown="reiniciarReloj()" ontouchstart="reiniciarReloj()" onkeypress="reiniciarReloj()">
 
-    <h2>ANALIZADOR DE CADENA</h2>
-    
-    <input type="text" id="entrada" placeholder="Escribe la clave aquí..." oninput="analizar()">
-    
-    <div class="panel">
-        <p><strong>Total caracteres:</strong> <span id="total">0</span></p>
-        <p><strong>Mapa numérico:</strong></p>
-        <div id="mapa">Esperando entrada...</div>
-        <hr>
-        <p><strong>Hash SHA-256 (Primeros 10):</strong><br><span id="hash-info">-</span></p>
+    <div id="seccion-error">
+        <h1 onclick="detectarClicks()">Error 404</h1>
+        <p>Servidor en mantenimiento programado.</p>
+        
+        <div id="caja-login" style="display:none; margin-top: 20px;">
+            <input type="password" id="pass" placeholder="Código de acceso" 
+                   autocomplete="off" autocorrect="off" autocapitalize="none" 
+                   spellcheck="false" inputmode="text">
+            <br>
+            <button type="button" onclick="acceder()">ENTRAR AL SISTEMA</button>
+        </div>
+    </div>
+
+    <div id="seccion-chat">
+        <h3 style="color:#bbb; font-size: 10px; letter-spacing: 1px;">REGISTRO ACTIVO</h3>
+        <div id="log"></div>
+        <input type="text" id="nota" placeholder="Escribir registro..." oninput="reiniciarReloj()">
+        <button onclick="guardar()">GUARDAR REGISTRO</button>
+        <p><small onclick="location.reload()" style="cursor:pointer; color:#ccc;">Finalizar sesión</small></p>
     </div>
 
     <script>
-        async function analizar() {
-            const texto = document.getElementById('entrada').value;
-            const total = document.getElementById('total');
-            const mapa = document.getElementById('mapa');
-            const hashInfo = document.getElementById('hash-info');
+        let tiempoCierre;
+        let contadorClicks = 0;
+        let timerClicks;
+        // Hash de la palabra "mota" en minúsculas
+        const CLAVE_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
 
-            total.innerText = texto.length;
-
-            // Convertimos cada letra a su valor numérico
-            let numeros = [];
-            for (let i = 0; i < texto.length; i++) {
-                numeros.push(`<span class="numero">${texto.charCodeAt(i)}</span>`);
-            }
-            mapa.innerHTML = numeros.length > 0 ? numeros.join(" - ") : "Vacio";
-
-            // Probamos la encriptación rápida
-            if (texto.length > 0) {
-                const utf8 = new TextEncoder().encode(texto);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashFinal = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                hashInfo.innerText = hashFinal.substring(0, 20) + "...";
+        function detectarClicks() {
+            contadorClicks++;
+            clearTimeout(timerClicks);
+            if (contadorClicks === 5) {
+                document.getElementById('caja-login').style.display = 'block';
+                contadorClicks = 0;
             } else {
-                hashInfo.innerText = "-";
+                timerClicks = setTimeout(() => { contadorClicks = 0; }, 2000);
             }
         }
+
+        async function sha256(string) {
+            const utf8 = new TextEncoder().encode(string);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function acceder() {
+            // LIMPIEZA TOTAL: quita espacios y fuerza minúsculas (convierte el 77 en 109)
+            const inputVal = document.getElementById('pass').value.trim().toLowerCase();
+            if (!inputVal) return;
+
+            const hashCalculado = await sha256(inputVal);
+            
+            if (hashCalculado === CLAVE_HASH) {
+                document.getElementById('seccion-error').style.display = 'none';
+                document.getElementById('seccion-chat').style.display = 'block';
+                reiniciarReloj();
+            } else {
+                // Ya no refrescamos para evitar perder el progreso si te equivocas
+                alert("Código incorrecto");
+                document.getElementById('pass').value = "";
+            }
+        }
+
+        function guardar() {
+            const campo = document.getElementById('nota');
+            if (campo.value !== "") {
+                const lista = document.getElementById('log');
+                lista.innerHTML += "<div>• " + campo.value + "</div>";
+                campo.value = "";
+                lista.scrollTop = lista.scrollHeight;
+                reiniciarReloj();
+            }
+        }
+
+        function reiniciarReloj() {
+            clearTimeout(tiempoCierre);
+            if (document.getElementById('seccion-chat').style.display === 'block') {
+                tiempoCierre = setTimeout(function() {
+                    location.reload(); 
+                }, 10000); 
+            }
+        }
+
+        document.addEventListener("visibilitychange", function() {
+            if (document.hidden) location.reload();
+        });
     </script>
 </body>
 </html>
