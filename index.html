@@ -1,107 +1,55 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estado del Servidor</title>
-    <style>
-        body { font-family: sans-serif; background: #f4f4f4; color: #666; text-align: center; padding: 50px 20px; margin: 0; overflow: hidden; touch-action: manipulation; }
-        #seccion-error { display: block; }
-        #seccion-chat { display: none; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        h1 { font-size: 45px; color: #ddd; cursor: pointer; margin-bottom: 10px; user-select: none; -webkit-user-select: none; }
-        input { padding: 12px; width: 80%; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; outline: none; }
-        button { padding: 12px 25px; background: #555; color: white; border: none; border-radius: 6px; font-size: 16px; cursor: pointer; width: 85%; }
-        #log { text-align: left; height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 10px; margin-bottom: 10px; font-size: 14px; background: #fafafa; }
-    </style>
+    <title>Experimento Timer vs Hash</title>
 </head>
-<body onmousedown="reiniciarReloj()" ontouchstart="reiniciarReloj()" onkeypress="reiniciarReloj()">
+<body style="text-align: center; font-family: monospace; padding-top: 50px;">
 
-    <div id="seccion-error">
-        <h1 onclick="detectarClicks()">Error 404</h1>
-        <p>Servidor en mantenimiento programado.</p>
-        
-        <div id="caja-login" style="display:none; margin-top: 20px;">
-            <input type="password" id="pass" placeholder="Código de acceso" autocapitalize="none" autocomplete="off">
-            <br>
-            <button type="button" onclick="acceder()">ENTRAR AL SISTEMA</button>
-        </div>
+    <h1>TEST DE CONFLICTO</h1>
+    
+    <div style="font-size: 30px; margin-bottom: 20px;">
+        Tiempo para cierre: <span id="segundos">10</span>s
     </div>
 
-    <div id="seccion-chat">
-        <h3 style="color:#bbb; font-size: 10px; letter-spacing: 1px;">REGISTRO ACTIVO</h3>
-        <div id="log"></div>
-        <input type="text" id="nota" placeholder="Escribir registro..." oninput="reiniciarReloj()">
-        <button onclick="guardar()">GUARDAR REGISTRO</button>
-        <p><small onclick="location.reload()" style="cursor:pointer; color:#ccc;">Finalizar sesión</small></p>
-    </div>
+    <input type="password" id="pass" placeholder="Escribe aquí">
+    <button onclick="probarHash()">PROBAR ENCRIPTACIÓN</button>
+
+    <p id="status" style="margin-top: 20px; color: blue;"></p>
 
     <script>
-        let tiempoCierre;
-        let contadorClicks = 0;
-        let timerClicks;
-        const CLAVE_HASH = "85e334794e222998a46e9196720d20e79752531e84e5659f816c14115169a917";
+        let segundosRestantes = 10;
+        const display = document.getElementById('segundos');
+        const status = document.getElementById('status');
 
-        function detectarClicks() {
-            contadorClicks++;
-            clearTimeout(timerClicks);
-            if (contadorClicks === 5) {
-                document.getElementById('caja-login').style.display = 'block';
-                contadorClicks = 0;
-            } else {
-                timerClicks = setTimeout(() => { contadorClicks = 0; }, 2000);
+        // 1. EL TIMER: Se ejecuta cada segundo sin falta
+        const intervalo = setInterval(() => {
+            segundosRestantes--;
+            display.innerText = segundosRestantes;
+            
+            if (segundosRestantes <= 0) {
+                status.innerText = "¡TIMER AGOTADO! (Simulación de reinicio)";
+                status.style.color = "red";
+                // Aquí es donde en el original se hace location.reload()
+                clearInterval(intervalo);
             }
-        }
+        }, 1000);
 
-        async function sha256(string) {
-            const utf8 = new TextEncoder().encode(string);
+        // 2. LA ENCRIPTACIÓN: Vamos a ver si esto detiene el reloj arriba
+        async function probarHash() {
+            const texto = document.getElementById('pass').value;
+            status.innerText = "Encriptando...";
+            
+            // Proceso SHA-256
+            const utf8 = new TextEncoder().encode(texto);
             const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
             const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        // AGREGADO: async para permitir el cálculo del hash
-        async function acceder() {
-            const elInput = document.getElementById('pass');
-            const inputVal = elInput.value.trim().toLowerCase();
+            const hashFinal = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
             
-            if (!inputVal) return;
-
-            const hashCalculado = await sha256(inputVal);
-            
-            if (hashCalculado === CLAVE_HASH) {
-                document.getElementById('seccion-error').style.display = 'none';
-                document.getElementById('seccion-chat').style.display = 'block';
-                reiniciarReloj();
-            } else {
-                // Si falla, limpiamos y recargamos
-                location.reload();
-            }
+            status.innerText = "Hash generado: " + hashFinal.substring(0, 10) + "...";
+            console.log("Hash completo:", hashFinal);
         }
-
-        function guardar() {
-            const campo = document.getElementById('nota');
-            if (campo.value !== "") {
-                const lista = document.getElementById('log');
-                lista.innerHTML += "<div>• " + campo.value + "</div>";
-                campo.value = "";
-                lista.scrollTop = lista.scrollHeight;
-                reiniciarReloj();
-            }
-        }
-
-        function reiniciarReloj() {
-            clearTimeout(tiempoCierre);
-            if (document.getElementById('seccion-chat').style.display === 'block') {
-                tiempoCierre = setTimeout(function() {
-                    location.reload(); 
-                }, 10000); 
-            }
-        }
-
-        document.addEventListener("visibilitychange", function() {
-            if (document.hidden) location.reload();
-        });
     </script>
 </body>
 </html>
-
