@@ -1,119 +1,15 @@
 <!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error 404</title>
-    <style>
-        body {
-            background-color: black;
-            color: #00ff00;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            box-sizing: border-box;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        #screen-404 {
-            font-size: 48px;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 20vh;
-            cursor: pointer;
-        }
-        #screen-password, #screen-chat {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            height: 100%;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 300px;
-            margin-top: 20px;
-        }
-        input {
-            background: black;
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            font-family: inherit;
-            padding: 10px;
-            outline: none;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        button {
-            background: black;
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            font-family: inherit;
-            padding: 10px 20px;
-            margin-top: 10px;
-            cursor: pointer;
-            width: 100%;
-        }
-        #chat-history {
-            flex: 1;
-            width: 100%;
-            overflow-y: auto;
-            border: 1px solid #00ff00;
-            padding: 10px;
-            margin-bottom: 10px;
-            white-space: pre-wrap;
-            font-size: 14px;
-        }
-        #chat-status {
-            margin-bottom: 5px;
-            font-style: italic;
-            font-size: 12px;
-        }
-        .panic-btn-small {
-            background: black;
-            border: 1px solid #00ff00;
-            color: #00ff00;
-            font-family: inherit;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-        #chat-controls {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-    </style>
-</head>
-<body onclick="resetInactivityTimer()" ontouchstart="resetInactivityTimer()">
-<div id="screen-404">Error 404</div>
-<div id="screen-password">
-    <div>Introducir Clave:</div>
-    <div class="input-group">
-        <input type="password" id="pass-input">
-        <button id="pass-btn">entrar</button>
-    </div>
-</div>
-<div id="screen-chat">
-    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-        <div id="chat-status">Iniciando...</div>
-        <button class="panic-btn-small" onclick="location.reload()">cerrar</button>
-    </div>
-    <div id="chat-history"></div>
-    <div id="chat-controls">
-        <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autofocus>
-        <button class="panic-btn-small" onclick="location.reload()">cerrar</button>
-    </div>
-</div>
-<script>
-/* Aquí va la librería PeerJS y la lógica de conexión que ya está en el archivo index.html */
-</script>
-</body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Architects+Daughter&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Fira+Code:wght@300..700&family=Geist+Mono:wght@100..900&family=Geist:wght@100..900&family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&family=IBM+Plex+Sans:ital,wght@0,100..700;1,100..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@100..900&family=Oxanium:wght@200..800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100..900;1,100..900&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&family=Space+Grotesk:wght@300..700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
