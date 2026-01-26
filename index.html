@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Error 404</title>
+    <style>
+        body {
+            background-color: black;
+            color: #00ff00;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            box-sizing: border-box;
+            user-select: none;
+            overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #screen-404 {
+            font-size: 48px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20vh;
+            cursor: pointer;
+            padding: 40px;
+            display: block;
+        }
+        #screen-password, #screen-chat {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 20px;
+        }
+        input {
+            background: black;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: inherit;
+            padding: 12px;
+            outline: none;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            background: black;
+            border: 1px solid #00ff00;
+            color: #00ff00;
+            font-family: inherit;
+            padding: 12px 20px;
+            margin-top: 10px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: lowercase;
+        }
+        #chat-history {
+            flex: 1;
+            width: 100%;
+            overflow-y: auto;
+            border: 1px solid #00ff00;
+            padding: 10px;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            font-size: 14px;
+            -webkit-overflow-scrolling: touch;
+        }
+        #chat-status {
+            margin-bottom: 5px;
+            font-style: italic;
+            font-size: 12px;
+        }
+        #chat-controls {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .row-buttons {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+        }
+        .row-buttons button {
+            margin-top: 0;
+            flex: 1;
+        }
+    </style>
+</head>
+<body onmousedown="resetInactivityTimer()" ontouchstart="resetInactivityTimer()" ontouchmove="resetInactivityTimer()">
+
+<div id="screen-404">Error 404</div>
+
+<div id="screen-password">
+    <div>Introducir Clave:</div>
+    <div class="input-group">
+        <input type="password" id="pass-input" autocomplete="off">
+        <button id="pass-btn">entrar</button>
+    </div>
+</div>
+
+<div id="screen-chat">
+    <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+        <div id="chat-status">Iniciando...</div>
+        <button style="width: auto; padding: 5px 10px; font-size: 12px; margin: 0;" onclick="location.reload()">cerrar</button>
+    </div>
+    <div id="chat-history"></div>
+    <div id="chat-controls">
+        <input type="text" id="chat-input" placeholder="Escribe un mensaje..." autocomplete="off">
+        <div class="row-buttons">
+            <button id="send-btn">enviar</button>
+            <button onclick="location.reload()">cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+<script>
+(function() {
+    const HASH_MOTA = "40e7bda903ae72a7e5dd1dcb98816f67b653579ba61a422fc694a8b9075fc9eb";
+    const HASH_MOTA_CAP = "6738ffa495d6629290cbf0cd705de98514d8233a9f3c79bf9a57a81b1abd5a55";
+    const ROOM_ID = "36d88c0353c7c34b6e512403d9203666035092f63854378f161494951664121d"; 
+
+    let clickTimes = [];
+    let inactivityTimer;
+    let peer, conn;
+    
+    const screen404 = document.getElementById('screen-404');
+    const screenPass = document.getElementById('screen-password');
+    const screenChat = document.getElementById('screen-chat');
+    const passInput = document.getElementById('pass-input');
+    const passBtn = document.getElementById('pass-btn');
+    const chatStatus = document.getElementById('chat-status');
+    const chatHistory = document.getElementById('chat-history');
+    const chatInput = document.getElementById('chat-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    window.resetInactivityTimer = function() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            location.reload();
+        }, 10000); 
+    };
+
+    const handleEntryClick = (e) => {
+        const now = Date.now();
+        if (clickTimes.length > 0) {
+            const lastClick = clickTimes[clickTimes.length - 1];
+            if (now - lastClick > 600) clickTimes = [];
+        }
+        clickTimes.push(now);
+        if (clickTimes.length === 5) {
+            clickTimes = [];
+            screen404.style.display = 'none';
+            screenPass.style.display = 'flex';
+            passInput.focus();
+        }
+    };
+
+    if (screen404) {
+        screen404.addEventListener('mousedown', handleEntryClick);
+        screen404.addEventListener('touchstart', (e) => {
+            handleEntryClick(e);
+        }, {passive: true});
+    }
+
+    async function checkPassword() {
+        const pass = passInput.value;
+        const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pass));
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        if (hashHex === HASH_MOTA || hashHex === HASH_MOTA_CAP) {
+            startChat(ROOM_ID);
+        } else {
+            alert("Acceso Denegado");
+            passInput.value = '';
+        }
+    }
+
+    if (passInput) passInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPassword(); });
+    if (passBtn) passBtn.addEventListener('click', checkPassword);
+
+    function startChat(roomId) {
+        screenPass.style.display = 'none';
+        screenChat.style.display = 'flex';
+        resetInactivityTimer();
+        peer = new Peer(roomId, { debug: 1 });
+        peer.on('open', () => {
+            chatStatus.textContent = "Esperando al otro usuario...";
+            appendMessage("Sistema", "Conectado. Esperando compañero...");
+        });
+        peer.on('connection', (c) => {
+            conn = c;
+            setupConnection();
+        });
+        peer.on('error', (err) => {
+            if (err.type === 'unavailable-id') {
+                peer = new Peer();
+                peer.on('open', () => {
+                    chatStatus.textContent = "Conectando...";
+                    appendMessage("Sistema", "Conectando con el compañero...");
+                    conn = peer.connect(roomId);
+                    setupConnection();
+                });
+            } else {
+                chatStatus.textContent = "Error: " + err.type;
+            }
+        });
+    }
+
+    function setupConnection() {
+        conn.on('open', () => {
+            chatStatus.textContent = "Conectado";
+            appendMessage("Sistema", "Conexión establecida.");
+        });
+        conn.on('data', (data) => {
+            resetInactivityTimer();
+            if (typeof data === 'string') appendMessage("Compañero", data);
+        });
+        conn.on('close', () => {
+            chatStatus.textContent = "Desconectado";
+            appendMessage("Sistema", "El compañero se ha desconectado.");
+        });
+    }
+
+    function sendMessage() {
+        resetInactivityTimer();
+        if (chatInput.value.trim() !== "") {
+            if (conn && conn.open) {
+                const msg = chatInput.value;
+                conn.send(msg);
+                appendMessage("Yo", msg);
+                chatInput.value = '';
+            } else {
+                appendMessage("Sistema", "No hay conexión.");
+            }
+        }
+    }
+
+    if (chatInput) chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+    if (sendBtn) sendBtn.addEventListener('click', sendMessage);
+
+    function appendMessage(sender, msg) {
+        const line = document.createElement('div');
+        line.textContent = `[${sender}]: ${msg}`;
+        chatHistory.appendChild(line);
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+    resetInactivityTimer();
+})();
+</script>
+</body>
+</html>
